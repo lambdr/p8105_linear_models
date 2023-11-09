@@ -26,3 +26,54 @@ scale_colour_discrete = scale_colour_viridis_d
 scale_fill_discrete = scale_fill_viridis_d
 ```
 
+## Load and clean the Airbnb data
+```{r import and tidy}
+data("nyc_airbnb")
+
+df_airbnb = nyc_airbnb |> 
+  mutate(stars = review_scores_location/2) |> 
+  select(price, stars, borough = neighbourhood_group, 
+         neighbourhood, room_type) |> 
+  filter(borough != "Staten Island")
+```
+
+let's fit a model!
+
+```{r basic lm}
+fit = df_airbnb |> 
+  lm(price ~ stars + borough, data = _)
+```
+
+Let's look at the `fit`.
+
+```{r}
+summary(fit)
+summary(fit)$coef
+#fitted.values(fit)
+```
+
+```{r tidy output}
+# Gives model info, r2, AIC, BIC
+fit |> 
+  broom::glance()
+
+# Reg coefficients
+fit |> 
+  broom::tidy() |> 
+  mutate(term = str_replace(term, "^borough", "Borough: ")) |> 
+  select(term, estimate, p.value) |> 
+  knitr::kable(digits = 3)
+```
+
+## Fit another model
+
+```{r fct reorder on cats}
+fit = df_airbnb |> 
+  mutate(borough = fct_infreq(borough),
+         room_type = fct_infreq(room_type)) |> 
+  lm(price ~ stars + borough + room_type, data = _) 
+
+fit |> 
+  broom::tidy()
+```
+
