@@ -46,7 +46,7 @@ fit = df_airbnb |>
 
 Let's look at the `fit`.
 
-```{r}
+```{r ways of looking at fit}
 summary(fit)
 summary(fit)$coef
 #fitted.values(fit)
@@ -78,7 +78,7 @@ fit |>
 ```
 
 ## Quick look at diagnostics
-```{r}
+```{r model diagnostics}
 df_airbnb |> 
   modelr::add_residuals(fit) |> 
   ggplot(aes(x = borough, y = resid)) + 
@@ -91,13 +91,15 @@ df_airbnb |>
   ggplot(aes(x = stars, y = resid)) + 
   geom_point()
 
+# Follow up about QQ plots
+
 ```
 
 ## Hypothesis test for cat predictor
 
 Fit a "null" and "alternative" model.
 
-```{r}
+```{r hypothesis test on nested model}
 fit_null = lm(price ~ stars + borough, data = df_airbnb)
 fit_alt = lm(price ~ stars + borough + room_type, data = df_airbnb)
 
@@ -105,3 +107,60 @@ anova(fit_null, fit_alt) |>
   broom::tidy()
 ```
 
+## Borough-level differences
+
+```{r look at interaction}
+fit = df_airbnb |> 
+  lm(price ~ stars * borough + room_type * borough, data = _)
+
+fit |> 
+  broom::tidy()
+```
+
+At least for exploratory analyses, you can separate by borough and fit models, and compare the betas across boroughs.
+
+```{r fit across df}
+# Create lm function for nested df
+lm_airbnb = function(df){
+  lm(
+    price ~ stars + room_type, data = df 
+  )
+}
+
+# Apply lm_airbnb function to each borough
+df_airbnb |> 
+  nest(df = -borough) |> 
+  mutate(
+    models = map(df, lm_airbnb),
+    results = map(models, broom::tidy)
+    ) |> 
+  select(borough, results) |> 
+  unnest(results) |> 
+  select(borough, term, estimate) |> 
+  pivot_wider(
+    names_from = term,
+    values_from = estimate
+  ) |> 
+  knitr::kable(digits = 2)
+```
+
+Same thing but just a little different (anonymous function).
+
+```{r anonymous function}
+df_airbnb |> 
+  nest(df = -borough) |> 
+  mutate(
+    models = map(df, \(df) lm(price ~ stars + room_type, data = df)),
+    results = map(models, broom::tidy)
+    ) |> 
+  select(borough, results) |> 
+  unnest(results) |> 
+  select(borough, term, estimate) |> 
+  pivot_wider(
+    names_from = term,
+    values_from = estimate
+  ) |> 
+  knitr::kable(digits = 2)
+```
+
+## Binary Outcomes
