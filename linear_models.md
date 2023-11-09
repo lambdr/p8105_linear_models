@@ -303,3 +303,32 @@ df_homicide <- read_csv("data/homicide-data.csv", na = "Unknown") |>
     ## 
     ## ℹ Use `spec()` to retrieve the full column specification for this data.
     ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
+
+Fit logistic regression
+
+``` r
+fit_logistic <- df_homicide |> 
+  glm(resolved ~ victim_age + victim_race + victim_sex,
+      data = _,
+      family = binomial())
+```
+
+Look at results
+
+``` r
+fit_logistic |> 
+  broom::tidy() |> 
+  mutate(or = exp(estimate)) |> 
+  select(term, estimate, or)
+```
+
+    ## # A tibble: 7 × 3
+    ##   term                estimate    or
+    ##   <chr>                  <dbl> <dbl>
+    ## 1 (Intercept)          1.49    4.42 
+    ## 2 victim_age          -0.00724 0.993
+    ## 3 victim_raceBlack    -1.14    0.320
+    ## 4 victim_raceHispanic -0.562   0.570
+    ## 5 victim_raceOther    -1.06    0.345
+    ## 6 victim_raceWhite    -0.296   0.744
+    ## 7 victim_sexMale      -0.880   0.415
