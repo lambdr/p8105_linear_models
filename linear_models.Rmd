@@ -2,7 +2,7 @@
 title: "Linear Models"
 author: "Derek Lamb"
 date: "`r Sys.Date()`"
-output: html_document
+output: github_document
 ---
 ```{r load packages, message = FALSE}
 # Load packages
@@ -164,3 +164,13 @@ df_airbnb |>
 ```
 
 ## Binary Outcomes
+
+```{r import data homicide}
+df_homicide <- read_csv("data/homicide-data.csv", na = "Unknown") |> 
+  filter(city == "Baltimore") |> 
+  mutate(
+    resolved = as.numeric(disposition == "Closed by arrest")
+  ) |> 
+  select(resolved, victim_age, victim_race, victim_sex)
+```
+
