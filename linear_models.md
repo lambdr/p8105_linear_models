@@ -1,7 +1,7 @@
 Linear Models
 ================
 Derek Lamb
-2023-11-09
+2023-11-14
 
 ``` r
 # Load packages
@@ -168,7 +168,18 @@ df_airbnb |>
 
 ``` r
 # Follow up about QQ plots
+df_airbnb |> 
+  modelr::add_residuals(fit) |> 
+  ggplot(aes(sample = resid)) + 
+  stat_qq() +
+  stat_qq_line()
 ```
+
+    ## Warning: Removed 9962 rows containing non-finite values (`stat_qq()`).
+
+    ## Warning: Removed 9962 rows containing non-finite values (`stat_qq_line()`).
+
+<img src="linear_models_files/figure-gfm/model diagnostics-3.png" width="90%" />
 
 ## Hypothesis test for cat predictor
 

@@ -92,6 +92,13 @@ df_airbnb |>
   geom_point()
 
 # Follow up about QQ plots
+df_airbnb |> 
+  modelr::add_residuals(fit) |> 
+  ggplot(aes(sample = resid)) + 
+  stat_qq() +
+  stat_qq_line()
+
+  
 
 ```
 
