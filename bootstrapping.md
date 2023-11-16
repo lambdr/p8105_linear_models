@@ -1,11 +1,11 @@
----
-title: "Bootstrapping"
-author: "Derek Lamb"
-date: "`r Sys.Date()`"
-output: github_document
----
+Bootstrapping
+================
+Derek Lamb
+2023-11-16
+
 ### Load packages
-```{r load packages and default options, message = FALSE}
+
+``` r
 # Load packages
 library(tidyverse)
 library(modelr)
@@ -32,7 +32,8 @@ scale_fill_discrete = scale_fill_viridis_d
 ```
 
 ## Generate a relevant example
-```{r generate data}
+
+``` r
 n_samp = 250
 
 df_sim_const = tibble(
@@ -47,26 +48,44 @@ df_sim_non =
     error = error * 0.75 * x,
     y = 2 + 3 * x + error
     )
-
 ```
 
-```{r look and compare}
+``` r
 df_sim_const |> 
   ggplot(aes(x = x, y = y)) + geom_point()
+```
 
+<img src="bootstrapping_files/figure-gfm/look and compare-1.png" width="90%" />
+
+``` r
 df_sim_non |> 
   ggplot(aes(x = x, y = y)) + geom_point()
 ```
+
+<img src="bootstrapping_files/figure-gfm/look and compare-2.png" width="90%" />
 
 Fit some linear models.
 
-```{r}
+``` r
 df_sim_const |> 
   lm(y ~ x, data = _) |> 
   broom::tidy()
+```
 
+    ## # A tibble: 2 × 5
+    ##   term        estimate std.error statistic   p.value
+    ##   <chr>          <dbl>     <dbl>     <dbl>     <dbl>
+    ## 1 (Intercept)     1.98    0.0981      20.2 3.65e- 54
+    ## 2 x               3.04    0.0699      43.5 3.84e-118
+
+``` r
 df_sim_non |> 
   lm(y ~ x, data = _) |> 
   broom::tidy()
 ```
 
+    ## # A tibble: 2 × 5
+    ##   term        estimate std.error statistic   p.value
+    ##   <chr>          <dbl>     <dbl>     <dbl>     <dbl>
+    ## 1 (Intercept)     1.93    0.105       18.5 1.88e- 48
+    ## 2 x               3.11    0.0747      41.7 5.76e-114
