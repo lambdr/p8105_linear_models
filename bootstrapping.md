@@ -175,3 +175,85 @@ df_results |>
     ##   <chr>          <dbl>    <dbl>
     ## 1 (Intercept)     1.78     2.08
     ## 2 x               2.91     3.31
+
+## Now let’s use the NYC Airbnb Data
+
+``` r
+data("nyc_airbnb")
+
+df_airbnb = nyc_airbnb |> 
+  mutate(stars = review_scores_location / 2) |> 
+  rename(borough = neighbourhood_group) |> 
+  filter(borough != "Staten Island") |> 
+  drop_na(stars, price) |> 
+  select(price, stars, room_type, borough)
+```
+
+Let’s fit a regression of `price` on other variables.
+
+``` r
+airbnb_fit =
+  df_airbnb |> 
+  lm(price ~ stars + room_type + borough, data = _)
+```
+
+Look at residuals.
+
+``` r
+# Residual histogram
+df_airbnb |> 
+  add_residuals(airbnb_fit) |> 
+  ggplot(aes(x = resid)) +
+  geom_density()
+```
+
+<img src="bootstrapping_files/figure-gfm/unnamed-chunk-5-1.png" width="90%" />
+
+``` r
+# Residual distribution
+df_airbnb |> 
+  add_residuals(airbnb_fit) |> 
+  ggplot(aes(x = stars, y = resid)) +
+  geom_point()
+```
+
+<img src="bootstrapping_files/figure-gfm/unnamed-chunk-5-2.png" width="90%" />
+
+``` r
+# A reminder, here's a QQ plot
+df_airbnb |> 
+  add_residuals(airbnb_fit) |> 
+  ggplot(aes(sample = resid)) +
+  stat_qq() +
+  stat_qq_line()
+```
+
+<img src="bootstrapping_files/figure-gfm/unnamed-chunk-5-3.png" width="90%" />
+
+Run a bootstrap on the whole thing to get estimates for the effect of
+`stars` on `price`.
+
+``` r
+df_manhattan = 
+  df_airbnb |> 
+  filter(borough == "Manhattan")
+
+boot_results = 
+  tibble(n_strap = 1:1000) |> 
+  mutate(
+    strap_samp = map(n_strap, \(i) boot_samp(df_manhattan)),
+    models = map(strap_samp, \(df) lm(price ~ stars + room_type, data = df)),
+    results = map(models, broom::tidy)
+    ) |> 
+  select(n_strap, results) |> 
+  unnest(results)
+```
+
+``` r
+boot_results |> 
+  filter(term == "stars") |> 
+  ggplot(aes(x = estimate)) + 
+  geom_density()
+```
+
+<img src="bootstrapping_files/figure-gfm/viz results-1.png" width="90%" />
