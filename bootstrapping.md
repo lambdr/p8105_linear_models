@@ -111,3 +111,67 @@ df_sim_non |>
     ## `geom_smooth()` using formula = 'y ~ x'
 
 <img src="bootstrapping_files/figure-gfm/prototype code-1.png" width="90%" />
+
+## Now iterate this
+
+``` r
+df_bootstrap = tibble(n_strap = 1:2500) |> 
+  mutate(
+    strap_samp = map(n_strap, \(i) boot_samp(df_sim_non))
+  )
+```
+
+Now do the `lm` fit.
+
+``` r
+df_results = 
+  df_bootstrap |> 
+  mutate(
+    models = map(strap_samp, \(df) lm(y ~ x, data = df)),
+    model_res = map(models, broom::tidy)
+    ) |> 
+  select(n_strap, model_res) |> 
+  unnest(model_res)
+```
+
+Try to summarize the results. Get a bootstrap SE
+
+``` r
+df_results |> 
+  group_by(term) |> 
+  summarize(
+    se = sd(estimate)
+    )
+```
+
+    ## # A tibble: 2 × 2
+    ##   term            se
+    ##   <chr>        <dbl>
+    ## 1 (Intercept) 0.0765
+    ## 2 x           0.103
+
+``` r
+df_results |> 
+  filter(term == "x") |> 
+  ggplot(aes(x = estimate)) + 
+  geom_density()
+```
+
+<img src="bootstrapping_files/figure-gfm/unnamed-chunk-3-1.png" width="90%" />
+
+Can I construct a confidence interval?
+
+``` r
+df_results |> 
+  group_by(term) |> 
+  summarize(
+    ci_lower = quantile(estimate, 0.025),
+    ci_upper = quantile(estimate, 0.975)
+    )
+```
+
+    ## # A tibble: 2 × 3
+    ##   term        ci_lower ci_upper
+    ##   <chr>          <dbl>    <dbl>
+    ## 1 (Intercept)     1.78     2.08
+    ## 2 x               2.91     3.31

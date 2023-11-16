@@ -87,4 +87,54 @@ df_sim_non |>
   stat_smooth(method = "lm")
 ```
 
+## Now iterate this
+
+```{r iterated bootstrapping}
+df_bootstrap = tibble(n_strap = 1:2500) |> 
+  mutate(
+    strap_samp = map(n_strap, \(i) boot_samp(df_sim_non))
+  )
+```
+
+Now do the `lm` fit.
+```{r fit lm on bootstraps}
+df_results = 
+  df_bootstrap |> 
+  mutate(
+    models = map(strap_samp, \(df) lm(y ~ x, data = df)),
+    model_res = map(models, broom::tidy)
+    ) |> 
+  select(n_strap, model_res) |> 
+  unnest(model_res)
+  
+```
+
+Try to summarize the results. Get a bootstrap SE
+
+```{r}
+df_results |> 
+  group_by(term) |> 
+  summarize(
+    se = sd(estimate)
+    )
+```
+
+```{r}
+df_results |> 
+  filter(term == "x") |> 
+  ggplot(aes(x = estimate)) + 
+  geom_density()
+```
+
+
+Can I construct a confidence interval?
+```{r 95% ci}
+df_results |> 
+  group_by(term) |> 
+  summarize(
+    ci_lower = quantile(estimate, 0.025),
+    ci_upper = quantile(estimate, 0.975)
+    )
+```
+
 
