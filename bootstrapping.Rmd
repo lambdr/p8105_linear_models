@@ -60,7 +60,7 @@ df_sim_non |>
 
 Fit some linear models.
 
-```{r}
+```{r fit lm}
 df_sim_const |> 
   lm(y ~ x, data = _) |> 
   broom::tidy()
@@ -111,7 +111,7 @@ df_results =
 
 Try to summarize the results. Get a bootstrap SE
 
-```{r}
+```{r bootstrap se}
 df_results |> 
   group_by(term) |> 
   summarize(
@@ -119,7 +119,7 @@ df_results |>
     )
 ```
 
-```{r}
+```{r estimate histogram}
 df_results |> 
   filter(term == "x") |> 
   ggplot(aes(x = estimate)) + 
@@ -151,7 +151,7 @@ df_airbnb = nyc_airbnb |>
 
 Let's fit a regression of `price` on other variables.
 
-```{r}
+```{r airbnb lm}
 airbnb_fit =
   df_airbnb |> 
   lm(price ~ stars + room_type + borough, data = _)
@@ -159,7 +159,7 @@ airbnb_fit =
 
 Look at residuals.
 
-```{r}
+```{r residual diagnostics}
 # Residual histogram
 df_airbnb |> 
   add_residuals(airbnb_fit) |> 
@@ -182,7 +182,7 @@ df_airbnb |>
 
 Run a bootstrap on the whole thing to get estimates for the effect of `stars` on `price`.
 
-```{r}
+```{r bootstrap on airbnb}
 df_manhattan = 
   df_airbnb |> 
   filter(borough == "Manhattan")

@@ -1,7 +1,7 @@
 Bootstrapping
 ================
 Derek Lamb
-2023-11-16
+2023-11-21
 
 ### Load packages
 
@@ -157,7 +157,7 @@ df_results |>
   geom_density()
 ```
 
-<img src="bootstrapping_files/figure-gfm/unnamed-chunk-3-1.png" width="90%" />
+<img src="bootstrapping_files/figure-gfm/estimate histogram-1.png" width="90%" />
 
 Can I construct a confidence interval?
 
@@ -207,7 +207,7 @@ df_airbnb |>
   geom_density()
 ```
 
-<img src="bootstrapping_files/figure-gfm/unnamed-chunk-5-1.png" width="90%" />
+<img src="bootstrapping_files/figure-gfm/residual diagnostics-1.png" width="90%" />
 
 ``` r
 # Residual distribution
@@ -217,7 +217,7 @@ df_airbnb |>
   geom_point()
 ```
 
-<img src="bootstrapping_files/figure-gfm/unnamed-chunk-5-2.png" width="90%" />
+<img src="bootstrapping_files/figure-gfm/residual diagnostics-2.png" width="90%" />
 
 ``` r
 # A reminder, here's a QQ plot
@@ -228,7 +228,7 @@ df_airbnb |>
   stat_qq_line()
 ```
 
-<img src="bootstrapping_files/figure-gfm/unnamed-chunk-5-3.png" width="90%" />
+<img src="bootstrapping_files/figure-gfm/residual diagnostics-3.png" width="90%" />
 
 Run a bootstrap on the whole thing to get estimates for the effect of
 `stars` on `price`.
